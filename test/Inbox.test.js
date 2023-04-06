@@ -5,10 +5,12 @@ const web3 = new Web3(ganache.provider());
 const InboxContract = require("../compile");
 
 let inbox;
+let accounts;
 const InitialMessage = "Hello world!";
+const NewMessage = "New hello world!";
 
 beforeEach(async () => {
-  const accounts = await web3.eth.getAccounts();
+  accounts = await web3.eth.getAccounts();
 
   inbox = await new web3.eth.Contract(InboxContract.abi)
     .deploy({
@@ -26,5 +28,11 @@ describe("Inbox", () => {
   it("has default message", async () => {
     const message = await inbox.methods.message().call();
     assert(message === InitialMessage);
+  });
+
+  it("can change the message", async () => {
+    await inbox.methods.setMessage(NewMessage).send({ from: accounts[0] });
+    const newMessage = inbox.methods.message().call();
+    assert(newMessage === NewMessage);
   });
 });
