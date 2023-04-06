@@ -2,29 +2,29 @@ const assert = require("assert");
 const ganache = require("ganache");
 const Web3 = require("web3");
 const web3 = new Web3(ganache.provider());
+const InboxContract = require("../compile");
 
-class Car {
-  park() {
-    return "stopped";
-  }
+let inbox;
+const InitialMessage = "Hello world!";
 
-  drive() {
-    return "vroom";
-  }
-}
+beforeEach(async () => {
+  const accounts = await web3.eth.getAccounts();
 
-let car;
-
-beforeEach(() => {
-  car = new Car();
+  inbox = await new web3.eth.Contract(InboxContract.abi)
+    .deploy({
+      data: InboxContract.evm.bytecode.object,
+      arguments: [InitialMessage],
+    })
+    .send({ from: accounts[0], gas: 1000000, gasPrice: "30000000000000" });
 });
 
-describe("Car", () => {
-  it("can park", () => {
-    assert(car.park() === "stopped");
+describe("Inbox", () => {
+  it("deploys a contract", () => {
+    assert.ok(inbox.options.address);
   });
 
-  it("can drive", () => {
-    assert(car.drive() === "vroom");
+  it("has default message", async () => {
+    const message = await inbox.methods.message().call();
+    assert(message === InitialMessage);
   });
 });
