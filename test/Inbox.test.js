@@ -2,7 +2,7 @@ const assert = require("assert");
 const ganache = require("ganache");
 const Web3 = require("web3");
 const web3 = new Web3(ganache.provider());
-const InboxContract = require("../compile");
+const { InboxContract } = require("../compile");
 
 let inbox;
 let accounts;
@@ -31,8 +31,8 @@ describe("Inbox", () => {
   });
 
   it("can change the message", async () => {
-    await inbox.methods.setMessage(NewMessage).send({ from: accounts[0] });
-    const newMessage = inbox.methods.message().call();
+    await inbox.methods.setMessage(NewMessage).send({ from: accounts[0], gas: 1000000 });
+    const newMessage = await inbox.methods.message().call();
     assert(newMessage === NewMessage);
   });
 });
